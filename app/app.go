@@ -729,7 +729,9 @@ func NewGaiaApp(
 
 	if upgradeInfo.Name == upgradeName && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := store.StoreUpgrades{
-			Added: []string{icahosttypes.StoreKey},
+			Added: []string{icacontrollertypes.StoreKey,
+				icahosttypes.StoreKey,
+				icaauthtypes.StoreKey},
 		}
 
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
@@ -903,6 +905,8 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(routertypes.ModuleName).WithKeyTable(routertypes.ParamKeyTable())
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
+	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
+	paramsKeeper.Subspace(icaauthtypes.ModuleName)
 
 	return paramsKeeper
 }
