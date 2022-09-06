@@ -770,6 +770,29 @@ func (app *GaiaApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci
 		panic(err)
 	}
 
+	icaRawGenesisState := genesisState[icatypes.ModuleName]
+
+	var icaGenesisState icatypes.GenesisState
+	if err := tmjson.Unmarshal(icaRawGenesisState, &icaGenesisState); err != nil {
+		panic(err)
+	}
+
+	icaGenesisState.HostGenesisState.Params.AllowMessages = []string{
+		sdk.MsgTypeURL(&banktypes.MsgSend{}),
+		sdk.MsgTypeURL(&banktypes.MsgMultiSend{}),
+		sdk.MsgTypeURL(&stakingtypes.MsgDelegate{}),
+		sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{}),
+		sdk.MsgTypeURL(&stakingtypes.MsgBeginRedelegate{}),
+		sdk.MsgTypeURL(&stakingtypes.MsgCreateValidator{}),
+		sdk.MsgTypeURL(&stakingtypes.MsgEditValidator{}),
+		sdk.MsgTypeURL(&distrtypes.MsgWithdrawDelegatorReward{}),
+		sdk.MsgTypeURL(&distrtypes.MsgSetWithdrawAddress{}),
+		sdk.MsgTypeURL(&distrtypes.MsgWithdrawValidatorCommission{}),
+		sdk.MsgTypeURL(&distrtypes.MsgFundCommunityPool{}),
+		sdk.MsgTypeURL(&govtypes.MsgVote{}),
+	}
+	
+
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
 
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
