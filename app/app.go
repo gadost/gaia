@@ -791,7 +791,13 @@ func (app *GaiaApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci
 		sdk.MsgTypeURL(&distrtypes.MsgFundCommunityPool{}),
 		sdk.MsgTypeURL(&govtypes.MsgVote{}),
 	}
-	
+
+	genesisJson, err := tmjson.Marshal(icaGenesisState)
+	if err != nil {
+		panic(err)
+	}
+
+	genesisState[icatypes.ModuleName] = genesisJson
 
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
 
