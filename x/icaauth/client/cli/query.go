@@ -1,48 +1,26 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/gaia/v7/x/icaauth/types"
+	"github.com/gadost/gaia/v7/x/icaauth/types"
 	"github.com/spf13/cobra"
 )
 
-// GetQueryCmd creates and returns the icaauth query command
-func GetQueryCmd() *cobra.Command {
+// GetQueryCmd returns the cli query commands for this module
+func GetQueryCmd(queryRoute string) *cobra.Command {
+	// Group icaauth queries under a subcommand
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
-		Short:                      "Querying commands for the icaauth module",
+		Short:                      fmt.Sprintf("Querying commands for the %s module", types.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
 	}
 
-	cmd.AddCommand(getInterchainAccountCmd())
-
-	return cmd
-}
-
-func getInterchainAccountCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:  "interchainaccounts [account] [connection-id] [counterparty-connection-id]",
-		Args: cobra.ExactArgs(3),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			res, err := queryClient.InterchainAccountFromAddress(cmd.Context(), types.NewQueryInterchainAccountRequest(args[0], args[1], args[2]))
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
+	cmd.AddCommand(CmdQueryParams())
+	cmd.AddCommand(CmdInterchainAccountAddress())
 
 	return cmd
 }

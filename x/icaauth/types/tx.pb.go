@@ -6,22 +6,27 @@ package types
 import (
 	context "context"
 	fmt "fmt"
+	_ "github.com/cosmos/cosmos-proto"
 	types "github.com/cosmos/cosmos-sdk/codec/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	_ "google.golang.org/protobuf/types/known/durationpb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -29,11 +34,14 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgRegisterAccount defines the payload for Msg/RegisterAccount
+// MsgRegisterAccount defines the request message for MsgRegisterAccount
 type MsgRegisterAccount struct {
-	Owner        string `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
-	ConnectionId string `protobuf:"bytes,2,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty" yaml:"connection_id"`
-	Version      string `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	// owner represents the owner of the interchain account
+	Owner string `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	// connectionId represents the IBC `connectionId` of the host chain
+	ConnectionId string `protobuf:"bytes,2,opt,name=connectionId,proto3" json:"connectionId,omitempty" yaml:"connection_id"`
+	// version represents the version of the ICA channel
+	Version string `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
 }
 
 func (m *MsgRegisterAccount) Reset()         { *m = MsgRegisterAccount{} }
@@ -69,7 +77,28 @@ func (m *MsgRegisterAccount) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRegisterAccount proto.InternalMessageInfo
 
-// MsgRegisterAccountResponse defines the response for Msg/RegisterAccount
+func (m *MsgRegisterAccount) GetOwner() string {
+	if m != nil {
+		return m.Owner
+	}
+	return ""
+}
+
+func (m *MsgRegisterAccount) GetConnectionId() string {
+	if m != nil {
+		return m.ConnectionId
+	}
+	return ""
+}
+
+func (m *MsgRegisterAccount) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
+// MsgRegisterAccountResponse defines the response message for MsgRegisterAccount
 type MsgRegisterAccountResponse struct {
 }
 
@@ -106,11 +135,16 @@ func (m *MsgRegisterAccountResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRegisterAccountResponse proto.InternalMessageInfo
 
-// MsgSubmitTx defines the payload for Msg/SubmitTx
+// MsgSubmitTx defines the request message for MsgSubmitTx
 type MsgSubmitTx struct {
-	Owner        string     `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
-	ConnectionId string     `protobuf:"bytes,2,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty" yaml:"connection_id"`
-	Msg          *types.Any `protobuf:"bytes,3,opt,name=msg,proto3" json:"msg,omitempty"`
+	// owner represents the owner of the interchain account
+	Owner string `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
+	// connectionId represents the IBC `connectionId` of the host chain
+	ConnectionId string `protobuf:"bytes,2,opt,name=connectionId,proto3" json:"connectionId,omitempty" yaml:"connection_id"`
+	// msgs represents the transactions to be submitted to the host chain
+	Msgs []*types.Any `protobuf:"bytes,3,rep,name=msgs,proto3" json:"msgs,omitempty"`
+	// timeoutDuration represents the timeout duration for the IBC packet from last block
+	TimeoutDuration *time.Duration `protobuf:"bytes,4,opt,name=timeoutDuration,proto3,stdduration" json:"timeoutDuration,omitempty"`
 }
 
 func (m *MsgSubmitTx) Reset()         { *m = MsgSubmitTx{} }
@@ -146,7 +180,35 @@ func (m *MsgSubmitTx) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSubmitTx proto.InternalMessageInfo
 
-// MsgSubmitTxResponse defines the response for Msg/SubmitTx
+func (m *MsgSubmitTx) GetOwner() string {
+	if m != nil {
+		return m.Owner
+	}
+	return ""
+}
+
+func (m *MsgSubmitTx) GetConnectionId() string {
+	if m != nil {
+		return m.ConnectionId
+	}
+	return ""
+}
+
+func (m *MsgSubmitTx) GetMsgs() []*types.Any {
+	if m != nil {
+		return m.Msgs
+	}
+	return nil
+}
+
+func (m *MsgSubmitTx) GetTimeoutDuration() *time.Duration {
+	if m != nil {
+		return m.TimeoutDuration
+	}
+	return nil
+}
+
+// MsgSubmitTxResponse defines the response message for MsgSubmitTx
 type MsgSubmitTxResponse struct {
 }
 
@@ -184,40 +246,45 @@ func (m *MsgSubmitTxResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgSubmitTxResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*MsgRegisterAccount)(nil), "icaauth.v1.MsgRegisterAccount")
-	proto.RegisterType((*MsgRegisterAccountResponse)(nil), "icaauth.v1.MsgRegisterAccountResponse")
-	proto.RegisterType((*MsgSubmitTx)(nil), "icaauth.v1.MsgSubmitTx")
-	proto.RegisterType((*MsgSubmitTxResponse)(nil), "icaauth.v1.MsgSubmitTxResponse")
+	proto.RegisterType((*MsgRegisterAccount)(nil), "chainmain.icaauth.v1.MsgRegisterAccount")
+	proto.RegisterType((*MsgRegisterAccountResponse)(nil), "chainmain.icaauth.v1.MsgRegisterAccountResponse")
+	proto.RegisterType((*MsgSubmitTx)(nil), "chainmain.icaauth.v1.MsgSubmitTx")
+	proto.RegisterType((*MsgSubmitTxResponse)(nil), "chainmain.icaauth.v1.MsgSubmitTxResponse")
 }
 
 func init() { proto.RegisterFile("icaauth/v1/tx.proto", fileDescriptor_09bf995a0c8f8b8c) }
 
 var fileDescriptor_09bf995a0c8f8b8c = []byte{
-	// 379 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0xce, 0x4c, 0x4e, 0x4c,
-	0x2c, 0x2d, 0xc9, 0xd0, 0x2f, 0x33, 0xd4, 0x2f, 0xa9, 0xd0, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17,
-	0xe2, 0x82, 0x0a, 0xea, 0x95, 0x19, 0x4a, 0x89, 0xa4, 0xe7, 0xa7, 0xe7, 0x83, 0x85, 0xf5, 0x41,
-	0x2c, 0x88, 0x0a, 0x29, 0xc9, 0xf4, 0xfc, 0xfc, 0xf4, 0x9c, 0x54, 0x7d, 0x30, 0x2f, 0xa9, 0x34,
-	0x4d, 0x3f, 0x31, 0xaf, 0x12, 0x22, 0xa5, 0xd4, 0xcb, 0xc8, 0x25, 0xe4, 0x5b, 0x9c, 0x1e, 0x94,
-	0x9a, 0x9e, 0x59, 0x5c, 0x92, 0x5a, 0xe4, 0x98, 0x9c, 0x9c, 0x5f, 0x9a, 0x57, 0x22, 0x24, 0xc2,
-	0xc5, 0x9a, 0x5f, 0x9e, 0x97, 0x5a, 0x24, 0xc1, 0xa8, 0xc0, 0xa8, 0xc1, 0x19, 0x04, 0xe1, 0x08,
-	0xd9, 0x72, 0xf1, 0x26, 0xe7, 0xe7, 0xe5, 0xa5, 0x26, 0x97, 0x64, 0xe6, 0xe7, 0xc5, 0x67, 0xa6,
-	0x48, 0x30, 0x81, 0x64, 0x9d, 0x24, 0x3e, 0xdd, 0x93, 0x17, 0xa9, 0x4c, 0xcc, 0xcd, 0xb1, 0x52,
-	0x42, 0x91, 0x56, 0x0a, 0xe2, 0x41, 0xf0, 0x3d, 0x53, 0x84, 0x24, 0xb8, 0xd8, 0xcb, 0x52, 0x8b,
-	0x8a, 0x33, 0xf3, 0xf3, 0x24, 0x98, 0xc1, 0xc6, 0xc2, 0xb8, 0x56, 0x1c, 0x1d, 0x0b, 0xe4, 0x19,
-	0x5e, 0x2c, 0x90, 0x67, 0x50, 0x92, 0xe1, 0x92, 0xc2, 0x74, 0x4e, 0x50, 0x6a, 0x71, 0x41, 0x7e,
-	0x5e, 0x71, 0xaa, 0xd2, 0x14, 0x46, 0x2e, 0x6e, 0xdf, 0xe2, 0xf4, 0xe0, 0xd2, 0xa4, 0xdc, 0xcc,
-	0x92, 0x90, 0x0a, 0xda, 0x38, 0x53, 0x8d, 0x8b, 0x39, 0xb7, 0x38, 0x1d, 0xec, 0x44, 0x6e, 0x23,
-	0x11, 0x3d, 0x48, 0xd8, 0xe9, 0xc1, 0xc2, 0x4e, 0xcf, 0x31, 0xaf, 0x32, 0x08, 0xa4, 0x00, 0xc9,
-	0xd1, 0xa2, 0x5c, 0xc2, 0x48, 0xae, 0x82, 0xb9, 0xd6, 0x68, 0x19, 0x23, 0x17, 0xb3, 0x6f, 0x71,
-	0xba, 0x50, 0x24, 0x17, 0x3f, 0x7a, 0xf8, 0xca, 0xe9, 0x21, 0x22, 0x4d, 0x0f, 0xd3, 0xc3, 0x52,
-	0x6a, 0xf8, 0xe5, 0x61, 0x56, 0x08, 0xb9, 0x70, 0x71, 0xc0, 0x03, 0x43, 0x1c, 0x4d, 0x0f, 0x4c,
-	0x42, 0x4a, 0x1e, 0x87, 0x04, 0xcc, 0x14, 0x27, 0xe7, 0x13, 0x8f, 0xe4, 0x18, 0x2f, 0x3c, 0x92,
-	0x63, 0x7c, 0xf0, 0x48, 0x8e, 0x71, 0xc2, 0x63, 0x39, 0x86, 0x0b, 0x8f, 0xe5, 0x18, 0x6e, 0x3c,
-	0x96, 0x63, 0x88, 0xd2, 0x4c, 0xcf, 0x2c, 0xc9, 0x28, 0x4d, 0xd2, 0x4b, 0xce, 0xcf, 0xd5, 0x4f,
-	0xce, 0x2f, 0xce, 0xcd, 0x2f, 0xd6, 0x4f, 0x4f, 0xcc, 0x4c, 0xd4, 0x2f, 0x33, 0xd7, 0xaf, 0xd0,
-	0x87, 0x25, 0xc6, 0x92, 0xca, 0x82, 0xd4, 0xe2, 0x24, 0x36, 0x70, 0x08, 0x19, 0x03, 0x02, 0x00,
-	0x00, 0xff, 0xff, 0x39, 0xe0, 0x83, 0x3c, 0xa4, 0x02, 0x00, 0x00,
+	// 449 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x53, 0xbb, 0x8e, 0xd3, 0x40,
+	0x14, 0xcd, 0x90, 0xc0, 0xc2, 0x04, 0x69, 0x25, 0xaf, 0x91, 0x1c, 0x0b, 0x79, 0x83, 0xab, 0x50,
+	0x64, 0x86, 0x0d, 0x82, 0x02, 0xd1, 0x6c, 0x44, 0xb3, 0x45, 0x24, 0x64, 0x28, 0x10, 0xcd, 0xca,
+	0x99, 0x0c, 0x93, 0x11, 0x3b, 0x73, 0x23, 0xcf, 0x38, 0xc4, 0x2d, 0x5f, 0x40, 0xc9, 0x87, 0xf0,
+	0x11, 0x88, 0x02, 0x6d, 0x49, 0x05, 0x28, 0xf9, 0x03, 0xbe, 0x00, 0xf9, 0x31, 0x3c, 0x12, 0x10,
+	0x34, 0xdb, 0x58, 0x3e, 0x3e, 0xe7, 0x9e, 0x7b, 0xef, 0xf1, 0x0c, 0x3e, 0x90, 0x2c, 0x4d, 0x73,
+	0x3b, 0xa7, 0xcb, 0x23, 0x6a, 0x57, 0x64, 0x91, 0x81, 0x05, 0xcf, 0x67, 0xf3, 0x54, 0x6a, 0x95,
+	0x4a, 0x4d, 0x1a, 0x9a, 0x2c, 0x8f, 0xc2, 0x1e, 0x03, 0xa3, 0xc0, 0x9c, 0x56, 0x1a, 0x5a, 0x83,
+	0xba, 0x20, 0xec, 0x09, 0x00, 0x71, 0xc6, 0x69, 0x85, 0xa6, 0xf9, 0x0b, 0x9a, 0xea, 0xa2, 0xa1,
+	0xa2, 0x6d, 0x6a, 0x96, 0x67, 0xa9, 0x95, 0xa0, 0x1b, 0xde, 0x17, 0x20, 0xa0, 0xb6, 0x2c, 0xdf,
+	0xea, 0xaf, 0xf1, 0x6b, 0x84, 0xbd, 0x89, 0x11, 0x09, 0x17, 0xd2, 0x58, 0x9e, 0x1d, 0x33, 0x06,
+	0xb9, 0xb6, 0x9e, 0x8f, 0x2f, 0xc3, 0x2b, 0xcd, 0xb3, 0x00, 0xf5, 0xd1, 0xe0, 0x5a, 0x52, 0x03,
+	0xef, 0x21, 0xbe, 0xce, 0x40, 0x6b, 0xce, 0x4a, 0xdb, 0x93, 0x59, 0x70, 0xa9, 0x24, 0xc7, 0xc1,
+	0xb7, 0xcf, 0x87, 0x7e, 0x91, 0xaa, 0xb3, 0x07, 0xf1, 0x4f, 0xf6, 0x54, 0xce, 0xe2, 0xe4, 0x37,
+	0xb5, 0x17, 0xe0, 0xbd, 0x25, 0xcf, 0x8c, 0x04, 0x1d, 0xb4, 0x2b, 0x57, 0x07, 0xe3, 0x9b, 0x38,
+	0xdc, 0x9d, 0x21, 0xe1, 0x66, 0x01, 0xda, 0xf0, 0x78, 0x83, 0x70, 0x77, 0x62, 0xc4, 0x93, 0x7c,
+	0xaa, 0xa4, 0x7d, 0xba, 0xba, 0x90, 0xd9, 0xee, 0xe1, 0x8e, 0x32, 0xc2, 0x04, 0xed, 0x7e, 0x7b,
+	0xd0, 0x1d, 0xf9, 0xa4, 0xce, 0x92, 0xb8, 0x2c, 0xc9, 0xb1, 0x2e, 0xc6, 0xdd, 0x0f, 0xef, 0x86,
+	0x7b, 0x66, 0xf6, 0x92, 0x94, 0xb3, 0x56, 0x72, 0xef, 0x04, 0xef, 0x5b, 0xa9, 0x38, 0xe4, 0xf6,
+	0x51, 0x13, 0x76, 0xd0, 0xe9, 0xa3, 0x41, 0x77, 0xd4, 0xdb, 0x71, 0x70, 0x82, 0x71, 0xe7, 0xed,
+	0x97, 0x43, 0x94, 0x6c, 0xd7, 0xc5, 0x37, 0xf0, 0xc1, 0x2f, 0x4b, 0xba, 0xe5, 0x47, 0x1f, 0x11,
+	0x6e, 0x4f, 0x8c, 0xf0, 0x14, 0xde, 0xdf, 0xfe, 0x47, 0x03, 0xf2, 0xa7, 0xd3, 0x43, 0x76, 0x93,
+	0x0c, 0xef, 0xfc, 0xaf, 0xd2, 0xb5, 0xf5, 0x9e, 0xe1, 0xab, 0x3f, 0xf2, 0xbe, 0xf5, 0xd7, 0x6a,
+	0x27, 0x09, 0x6f, 0xff, 0x53, 0xe2, 0x9c, 0xc7, 0x8f, 0xdf, 0xaf, 0x23, 0x74, 0xbe, 0x8e, 0xd0,
+	0xd7, 0x75, 0x84, 0xde, 0x6c, 0xa2, 0xd6, 0xf9, 0x26, 0x6a, 0x7d, 0xda, 0x44, 0xad, 0xe7, 0xf7,
+	0x85, 0xb4, 0xf3, 0x7c, 0x4a, 0x18, 0x28, 0xca, 0xb2, 0x62, 0x61, 0x61, 0x08, 0x99, 0x18, 0x56,
+	0xce, 0xb4, 0x7a, 0x0e, 0xcb, 0x06, 0x74, 0x45, 0xdd, 0x55, 0xb2, 0xc5, 0x82, 0x9b, 0xe9, 0x95,
+	0x2a, 0xe3, 0xbb, 0xdf, 0x03, 0x00, 0x00, 0xff, 0xff, 0x1f, 0x2e, 0xcf, 0x3f, 0x62, 0x03, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -232,9 +299,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// Register defines a rpc handler for MsgRegisterAccount
+	// RegisterAccount registers an interchain account on host chain with given `connectionId`
 	RegisterAccount(ctx context.Context, in *MsgRegisterAccount, opts ...grpc.CallOption) (*MsgRegisterAccountResponse, error)
-	// SubmitTx defines a rpc handler for MsgSubmitTx
+	// SubmitTx submits a transaction to the host chain on behalf of interchain account
 	SubmitTx(ctx context.Context, in *MsgSubmitTx, opts ...grpc.CallOption) (*MsgSubmitTxResponse, error)
 }
 
@@ -248,7 +315,7 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 
 func (c *msgClient) RegisterAccount(ctx context.Context, in *MsgRegisterAccount, opts ...grpc.CallOption) (*MsgRegisterAccountResponse, error) {
 	out := new(MsgRegisterAccountResponse)
-	err := c.cc.Invoke(ctx, "/icaauth.v1.Msg/RegisterAccount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/chainmain.icaauth.v1.Msg/RegisterAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -257,7 +324,7 @@ func (c *msgClient) RegisterAccount(ctx context.Context, in *MsgRegisterAccount,
 
 func (c *msgClient) SubmitTx(ctx context.Context, in *MsgSubmitTx, opts ...grpc.CallOption) (*MsgSubmitTxResponse, error) {
 	out := new(MsgSubmitTxResponse)
-	err := c.cc.Invoke(ctx, "/icaauth.v1.Msg/SubmitTx", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/chainmain.icaauth.v1.Msg/SubmitTx", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -266,9 +333,9 @@ func (c *msgClient) SubmitTx(ctx context.Context, in *MsgSubmitTx, opts ...grpc.
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// Register defines a rpc handler for MsgRegisterAccount
+	// RegisterAccount registers an interchain account on host chain with given `connectionId`
 	RegisterAccount(context.Context, *MsgRegisterAccount) (*MsgRegisterAccountResponse, error)
-	// SubmitTx defines a rpc handler for MsgSubmitTx
+	// SubmitTx submits a transaction to the host chain on behalf of interchain account
 	SubmitTx(context.Context, *MsgSubmitTx) (*MsgSubmitTxResponse, error)
 }
 
@@ -297,7 +364,7 @@ func _Msg_RegisterAccount_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/icaauth.v1.Msg/RegisterAccount",
+		FullMethod: "/chainmain.icaauth.v1.Msg/RegisterAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).RegisterAccount(ctx, req.(*MsgRegisterAccount))
@@ -315,7 +382,7 @@ func _Msg_SubmitTx_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/icaauth.v1.Msg/SubmitTx",
+		FullMethod: "/chainmain.icaauth.v1.Msg/SubmitTx",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).SubmitTx(ctx, req.(*MsgSubmitTx))
@@ -324,7 +391,7 @@ func _Msg_SubmitTx_Handler(srv interface{}, ctx context.Context, dec func(interf
 }
 
 var _Msg_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "icaauth.v1.Msg",
+	ServiceName: "chainmain.icaauth.v1.Msg",
 	HandlerType: (*MsgServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -427,17 +494,29 @@ func (m *MsgSubmitTx) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Msg != nil {
-		{
-			size, err := m.Msg.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTx(dAtA, i, uint64(size))
+	if m.TimeoutDuration != nil {
+		n1, err1 := github_com_gogo_protobuf_types.StdDurationMarshalTo(*m.TimeoutDuration, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdDuration(*m.TimeoutDuration):])
+		if err1 != nil {
+			return 0, err1
 		}
+		i -= n1
+		i = encodeVarintTx(dAtA, i, uint64(n1))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
+	}
+	if len(m.Msgs) > 0 {
+		for iNdEx := len(m.Msgs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Msgs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
 	}
 	if len(m.ConnectionId) > 0 {
 		i -= len(m.ConnectionId)
@@ -534,8 +613,14 @@ func (m *MsgSubmitTx) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Msg != nil {
-		l = m.Msg.Size()
+	if len(m.Msgs) > 0 {
+		for _, e := range m.Msgs {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	if m.TimeoutDuration != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdDuration(*m.TimeoutDuration)
 		n += 1 + l + sovTx(uint64(l))
 	}
 	return n
@@ -847,7 +932,7 @@ func (m *MsgSubmitTx) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Msg", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Msgs", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -874,10 +959,44 @@ func (m *MsgSubmitTx) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Msg == nil {
-				m.Msg = &types.Any{}
+			m.Msgs = append(m.Msgs, &types.Any{})
+			if err := m.Msgs[len(m.Msgs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
-			if err := m.Msg.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TimeoutDuration", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TimeoutDuration == nil {
+				m.TimeoutDuration = new(time.Duration)
+			}
+			if err := github_com_gogo_protobuf_types.StdDurationUnmarshal(m.TimeoutDuration, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

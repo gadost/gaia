@@ -3,27 +3,27 @@ package types
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-
-	// this line is used by starport scaffolding # 1
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 )
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
-	// cdc.RegisterConcrete(&MsgRegisterAccount{}, "icaauth/MsgRegisterAccount", nil)
-	// cdc.RegisterConcrete(&MsgSubmitTx{}, "icaauth/MsgSubmitTx", nil)
+	cdc.RegisterConcrete(&MsgRegisterAccount{}, "icaauth/RegisterAccount", nil)
+	cdc.RegisterConcrete(&MsgSubmitTx{}, "icaauth/SubmitTx", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
-	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
-	registry.RegisterImplementations(
-		(*sdk.Msg)(nil),
+	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgRegisterAccount{},
+	)
+	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgSubmitTx{},
 	)
+
+	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }
 
 var (
-	amino     = codec.NewLegacyAmino()
-	ModuleCdc = codec.NewAminoCodec(amino)
+	Amino     = codec.NewLegacyAmino()
+	ModuleCdc = codec.NewProtoCodec(cdctypes.NewInterfaceRegistry())
 )
